@@ -12,8 +12,373 @@
 <link rel="icon" href="/images/logo.png" type="image/png">
 <link rel="canonical" href="galerie.html">
 <link rel="stylesheet" href="/css/style.css">
+
+<style>
+    :root {
+        --gal-green: #2f7d4a;
+        --gal-green-dark: #205c35;
+        --gal-cream: #f7f4ea;
+    }
+
+    /* =========================
+       FILTRES
+    ========================= */
+
+    .gallery-section {
+        max-width: 1250px;
+        margin: auto;
+        padding: 70px 20px;
+    }
+
+    .gallery-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 35px;
+    }
+
+    .gallery-filter {
+        border: 2px solid var(--gal-green);
+        background: white;
+        color: var(--gal-green-dark);
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .25s ease;
+        font-size: 14.5px;
+    }
+
+    .gallery-filter:hover,
+    .gallery-filter.active {
+        background: var(--gal-green);
+        color: white;
+    }
+
+    /* =========================
+       LECTEUR D'ALBUM
+    ========================= */
+
+    .album-viewer {
+        display: none;
+        margin: 0 auto 50px;
+        max-width: 1050px;
+        background: white;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 12px 40px rgba(0,0,0,.10);
+    }
+
+    .album-viewer.active {
+        display: block;
+        animation: albumAppear .35s ease;
+    }
+
+    @keyframes albumAppear {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .album-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+
+    .album-heading h2 {
+        font-family: Georgia, serif;
+        font-size: clamp(22px, 4vw, 32px);
+        color: var(--gal-green-dark);
+    }
+
+    .album-heading-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-shrink: 0;
+    }
+
+    .album-counter {
+        font-weight: 700;
+        color: var(--gal-green);
+        white-space: nowrap;
+    }
+
+    .album-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        background: var(--gal-cream);
+        color: var(--gal-green-dark);
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .album-close:hover {
+        background: var(--gal-green);
+        color: white;
+    }
+
+    .album-photo-wrap {
+        position: relative;
+        width: 100%;
+        height: min(68vh, 650px);
+        min-height: 320px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #111;
+    }
+
+    .album-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .album-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 52px;
+        height: 52px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255,255,255,.92);
+        color: var(--gal-green-dark);
+        font-size: 30px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 5px 18px rgba(0,0,0,.25);
+        transition: .2s ease;
+        z-index: 2;
+    }
+
+    .album-arrow:hover {
+        transform: translateY(-50%) scale(1.08);
+        background: white;
+    }
+
+    .album-arrow.prev { left: 18px; }
+    .album-arrow.next { right: 18px; }
+
+    .album-caption {
+        padding: 18px 5px 4px;
+    }
+
+    .album-caption span {
+        display: block;
+        color: var(--gal-green);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .album-caption h3 {
+        font-size: 21px;
+        margin-bottom: 5px;
+    }
+
+    .album-caption p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .album-hint {
+        text-align: center;
+        color: #777;
+        font-size: 14px;
+        margin-top: 14px;
+    }
+
+    /* =========================
+       GRILLE DE LA GALERIE
+    ========================= */
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 250px;
+        grid-auto-flow: dense;
+        gap: 20px;
+    }
+
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        background: #ddd;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .gallery-item.pattern-large {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+
+    .gallery-item.pattern-vertical {
+        grid-row: span 2;
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .6s ease, filter .5s ease;
+    }
+
+    .gallery-item:hover img,
+    .gallery-item:hover video {
+        transform: scale(1.08);
+        filter: brightness(.75);
+    }
+
+    .gallery-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 35px 20px 20px;
+        color: white;
+        background: linear-gradient(transparent, rgba(0,0,0,.75));
+        transform: translateY(5px);
+        transition: .4s ease;
+    }
+
+    .gallery-item:hover .gallery-caption {
+        transform: translateY(0);
+    }
+
+    .gallery-caption span {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 6px;
+        opacity: .85;
+    }
+
+    .gallery-caption h3 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* Emplacement vide : indique clairement où ajouter une photo */
+
+    .gallery-item.empty {
+        cursor: default;
+        box-shadow: none;
+        background: var(--gal-cream);
+        border: 2px dashed #b9cdb9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        color: var(--gal-green-dark);
+    }
+
+    .gallery-item.empty svg {
+        margin-bottom: 10px;
+        opacity: .55;
+    }
+
+    .gallery-item.empty span {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        opacity: .8;
+        margin-bottom: 4px;
+    }
+
+    .gallery-item.empty p {
+        font-size: 13.5px;
+        opacity: .75;
+        max-width: 22ch;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
+        .gallery-grid {
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 220px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .gallery-section {
+            padding: 40px 15px;
+        }
+
+        .gallery-grid {
+            grid-template-columns: 1fr;
+            grid-auto-rows: 260px;
+        }
+
+        .gallery-item.pattern-large,
+        .gallery-item.pattern-vertical {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .gallery-caption {
+            transform: none;
+        }
+
+        .gallery-filters {
+            justify-content: flex-start;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 5px;
+        }
+
+        .gallery-filter {
+            flex: 0 0 auto;
+        }
+
+        .album-viewer {
+            padding: 14px;
+            border-radius: 16px;
+        }
+
+        .album-heading h2 {
+            font-size: 22px;
+        }
+
+        .album-photo-wrap {
+            min-height: 280px;
+            height: 55vh;
+        }
+
+        .album-arrow {
+            width: 44px;
+            height: 44px;
+            font-size: 26px;
+        }
+
+        .album-arrow.prev { left: 10px; }
+        .album-arrow.next { right: 10px; }
+    }
+</style>
 </head>
 <body>
+
 <header class="site-header">
   <div class="topbar">
     <div class="container">
@@ -33,11 +398,10 @@
     </a>
     <ul class="nav-links" id="nav-links">
         <li><a href="index.html">Accueil</a></li>
-        <li><a href="a-propos.html">Qui sommes-nous</a></li>
-        <li><a href="objectifs.html">Nos objectifs</a></li>
-        <li><a href="projets.html">Nos projets</a></li>
-        <li><a href="actions.html">Nos actions</a></li>
-        <li><a href="actualites.html">Actualités</a></li>
+        <li><a href="apropos.html">Qui sommes-nous</a></li>
+        <li><a href="objectifs.html">Nos engagement</a></li>
+        <li><a href="actions.html">Nos actions </a></li>
+         <li><a href="actualites.html">Actualités</a></li>
         <li><a href="galerie.html" aria-current="page">Galerie</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li class="nav-cta-mobile">
@@ -52,21 +416,62 @@
     </button>
   </nav>
 </header>
+
 <section class="page-hero">
   <div class="container">
     <div class="breadcrumb"><a href="index.html">Accueil</a><span>/</span><span>Galerie</span></div>
     <h1>Nos actions en images</h1>
-    <p>Un aperçu visuel de nos activités sur le terrain. Cette galerie est amenée à s'enrichir au fil de nos actions — les emplacements ci-dessous sont prêts à recevoir vos photos.</p>
+    <p>Un aperçu visuel de nos activités sur le terrain. Cette galerie s'enrichit au fil de nos actions — les emplacements encore vides sont prêts à recevoir vos prochaines photos.</p>
   </div>
   <div class="hero-wave" aria-hidden="true">
-  <svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path fill="var(--cream)" d="M0,64 C240,110 480,10 720,40 C960,70 1200,110 1440,56 L1440,120 L0,120 Z"></path></svg>
-</div>
-</section>
-<section>
-  <div class="container">
-    <div class="gallery-grid reveal"><div class="g-item g-tall"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Séance de sensibilisation en milieu scolaire</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Collecte de dons de sang</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Atelier de formation avec les femmes</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Distribution de kits aux familles</span></div><div class="g-item g-tall"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Arbre de Noël solidaire</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Rencontre communautaire à Duékoué</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Lancement officiel de l'association</span></div><div class="g-item "><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.3"/></svg><span class="g-label">Visite de terrain de l'équipe</span></div></div>
-    <p class="text-center" style="margin-top:28px; color:var(--ink-soft); font-size:.88rem;">Emplacements réservés — remplacez ces cadres par vos photographies réelles (format carré recommandé, 1200×1200 px minimum).</p>
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path fill="var(--cream)" d="M0,64 C240,110 480,10 720,40 C960,70 1200,110 1440,56 L1440,120 L0,120 Z"></path></svg>
   </div>
+</section>
+
+<section class="gallery-section">
+
+    <div class="gallery-filters" aria-label="Catégories de la galerie">
+        <button class="gallery-filter active" data-category="all">Toutes</button>
+        <button class="gallery-filter" data-category="education">Don de sang </button>
+        <button class="gallery-filter" data-category="sante">Arbre de noël</button>
+        <button class="gallery-filter" data-category="autonomisation">jeune mère et de son bébé
+ </button>
+       <!-- <button class="gallery-filter" data-category="solidarite">Solidarité</button>
+        <button class="gallery-filter" data-category="communaute">Communauté</button>
+        <button class="gallery-filter" data-category="terrain">Terrain</button>
+        <button class="gallery-filter" data-category="ong">ONG Ôhôyôfou</button> -->
+    </div>
+
+    <!-- Le lecteur d'album apparaît directement dans la page, sans ouvrir de fenêtre. -->
+    <div class="album-viewer" id="albumViewer">
+        <div class="album-heading">
+            <h2 id="albumTitle">Notre galerie</h2>
+            <div class="album-heading-right">
+                <span class="album-counter" id="albumCounter">1 / 1</span>
+                <button class="album-close" id="closeAlbum" aria-label="Fermer l'album">✕</button>
+            </div>
+        </div>
+
+        <div class="album-photo-wrap">
+            <button class="album-arrow prev" id="prevPhoto" aria-label="Photo précédente">‹</button>
+            <img class="album-photo" id="albumPhoto" src="" alt="">
+            <button class="album-arrow next" id="nextPhoto" aria-label="Photo suivante">›</button>
+        </div>
+
+        <div class="album-caption">
+            <span id="albumCategory"></span>
+            <h3 id="albumPhotoTitle"></h3>
+            <p id="albumPhotoDescription"></p>
+        </div>
+
+        <div class="album-hint">
+            Utilisez les flèches (ou glissez sur mobile) pour parcourir les photos de cet album.
+        </div>
+    </div>
+
+    <!-- La grille ci-dessous est générée automatiquement par le script, à partir de la liste "albums". -->
+    <div class="gallery-grid" id="galleryGrid"></div>
+
 </section>
 
 <section style="background:var(--green-050);">
@@ -80,6 +485,7 @@
     </div>
   </div>
 </section>
+
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
@@ -118,6 +524,8 @@
           <li><a href="contact.html">Contact</a></li>
           <li><a href="#">Politique de confidentialité</a></li>
         </ul>
+       <img src="/VIDEO/00921.mp4" alt="">
+       
       </div>
       <div>
         <h4>Contact</h4>
@@ -127,6 +535,14 @@
           <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg> contact.ohoyofou@gmail.com</li>
         </ul>
       </div>
+      
+  <img src="/bebe maman /14e0c391-2f99-46bf-9a51-0bd34ac777a9.JPG" alt="">
+  <img src="/bebe maman /340f060c-a96f-4f9e-92bd-ac8e7f7c36e0.JPG" alt="">
+  <img src="/images/bebe maman /340f060c-a96f-4f9e-92bd-ac8e7f7c36e0.JPG" alt="">
+   
+
+      <img src="/VIDEO/00921_3.mp4" alt="">
+      
     </div>
     <div class="footer-bottom">
       <span>© <span class="js-year">2026</span> ONG Ôhôyôfou — Tous droits réservés.</span>
@@ -134,6 +550,309 @@
     </div>
   </div>
 </footer>
+
+<script>
+/* ==========================================================================
+   COMMENT AJOUTER UNE PHOTO (OU UNE VIDÉO) À LA GALERIE
+   ==========================================================================
+   1. Repérez ci-dessous la catégorie concernée : education, sante,
+      autonomisation, solidarite, communaute, terrain ou ong.
+   2. Dans le tableau "photos" de cette catégorie, ajoutez un nouvel élément
+      entre accolades { }, séparé du précédent par une virgule :
+
+        {
+            src: "images/galerie/nom-du-fichier.jpg",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        }
+
+      Pour une vidéo, ajoutez simplement type: "video" :
+
+        {
+            src: "images/galerie/nom-du-fichier.mp4",
+            type: "video",
+            title: "Titre de la vidéo",
+            description: "Description de la vidéo."
+        }
+
+   3. Déposez le fichier (photo ou vidéo) dans le dossier "images/galerie/"
+      de votre site, avec exactement le même nom que dans "src".
+   4. Enregistrez la page : la nouvelle photo apparaît automatiquement dans
+      la grille et dans l'album de sa catégorie — aucune autre modification
+      n'est nécessaire.
+   ========================================================================== */
+
+const albums = {
+    education: {
+        label: "Don de sang",
+        photos: [
+            // Exemple à décommenter et modifier :
+            
+            { src: "/images/don de sang/DSC09128.png", title: "Un moment annuel de joie, de partage et de fraternité pour les enfants de la région.", description: "Une action de sensibilisation auprès des communautés scolaires." },
+
+            
+        {
+            src: "/images/don de sang/DSC09130.png",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        
+        
+        
+        {
+            src: "/images/don de sang/DSC09140.png",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        {
+            src: "/images/don de sang/DSC09142.png", 
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        {
+            src: "/images/don de sang/DSC09148.png",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        {
+            src: "/images/don de sang/DSC09153.png",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        ]
+
+    },
+
+    sante: {
+        label: "Arbre de noël",
+        photos: [
+           
+        {
+            src: "/images/arbre de noel /3dbbad34-d524-4155-bfd1-9b510924ccfd.JPG",   
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        
+        {
+            src: "/images/arbre de noel /FC5A32A8-56BF-418C-BBAF-F6D898CE8024 2.PNG",
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        
+        ]
+    },
+
+    autonomisation: {
+        label: "solidarité en faveur d’une jeune mère et de son bébé",
+        photos: [
+            
+            {
+            src: "/images/bebe maman /340f060c-a96f-4f9e-92bd-ac8e7f7c36e0.JPG",   
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+        {
+            src: "/images/bebe maman /c64e5d3c-a8e2-4589-8a34-56e1fcf36fc9.JPG",   
+            title: "Titre affiché sous la photo",
+            description: "Une courte description de ce que montre la photo."
+        },
+            
+        ]
+    },
+
+  /* solidarite: {
+        label: "Solidarité",
+        photos: [
+            { src: "images/distribution.jpg", title: "Distribution de kits aux familles", description: "Une action de solidarité auprès des familles." },
+            { src: "images/arbre-noel.jpg", title: "Arbre de Noël solidaire", description: "Un moment de partage et de solidarité." }
+        ]
+    }, */
+
+  /*  communaute: {
+        label: "Communauté",
+        photos: [
+            { src: "images/rencontre.jpg", title: "Rencontre communautaire à Duékoué", description: "Une rencontre avec les communautés." }
+        ]
+    }, */
+
+  /*  terrain: {
+        label: "Terrain",
+        photos: [
+            { src: "images/equipe.jpg", title: "Visite de terrain de l'équipe", description: "L'équipe en action sur le terrain." }
+        ]
+    }, */
+
+    ong: {
+        label: "ONG Ôhôyôfou",
+        photos: [
+            { src: "images/lancement.jpg", title: "Lancement officiel de l'association", description: "Un moment important dans la vie de l'association." }
+        ]
+    }
+}; 
+
+/* ==========================================================================
+   Le code ci-dessous construit la grille automatiquement à partir de la
+   liste "albums" ci-dessus. Il n'y a normalement rien à modifier ici.
+   ========================================================================== */
+
+const galleryGrid   = document.getElementById("galleryGrid");
+const albumViewer   = document.getElementById("albumViewer");
+const albumTitle    = document.getElementById("albumTitle");
+const albumCounter  = document.getElementById("albumCounter");
+const albumPhoto    = document.getElementById("albumPhoto");
+const albumCategory = document.getElementById("albumCategory");
+const albumPhotoTitle       = document.getElementById("albumPhotoTitle");
+const albumPhotoDescription = document.getElementById("albumPhotoDescription");
+
+let currentAlbum = null;
+let currentIndex = 0;
+
+const emptyIcon = `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="m4.5 17 4.5-4.5L12 15l3-3 4.5 4.5"/></svg>`;
+
+// Motif de mise en page (grande photo / photo verticale / photo normale)
+// répété automatiquement pour donner un rendu varié à la grille.
+const layoutPattern = ["pattern-large", "", "pattern-vertical", "", "", "pattern-vertical", "", "pattern-large"];
+
+function buildGallery() {
+    galleryGrid.innerHTML = "";
+    let cardIndex = 0;
+
+    Object.keys(albums).forEach(function (categoryKey) {
+        const album = albums[categoryKey];
+
+        if (album.photos.length === 0) {
+            const emptyCard = document.createElement("div");
+            emptyCard.className = "gallery-item empty";
+            emptyCard.innerHTML =
+                emptyIcon +
+                "<span>" + album.label + "</span>" +
+                "<p>Aucune photo pour le moment — ajoutez-en une dans le fichier de la galerie.</p>";
+            galleryGrid.appendChild(emptyCard);
+            cardIndex++;
+            return;
+        }
+
+        const firstPhoto = album.photos[0];
+        const card = document.createElement("div");
+        card.className = "gallery-item " + layoutPattern[cardIndex % layoutPattern.length];
+        card.dataset.category = categoryKey;
+        card.addEventListener("click", function () { showAlbum(categoryKey); });
+
+        const mediaHtml = firstPhoto.type === "video"
+            ? '<video src="' + firstPhoto.src + '" muted playsinline></video>'
+            : '<img src="' + firstPhoto.src + '" alt="' + firstPhoto.title + '">';
+
+        card.innerHTML =
+            mediaHtml +
+            '<div class="gallery-caption">' +
+                "<span>" + album.label + (album.photos.length > 1 ? " · " + album.photos.length + " photos" : "") + "</span>" +
+                "<h3>" + firstPhoto.title + "</h3>" +
+            "</div>";
+
+        galleryGrid.appendChild(card);
+        cardIndex++;
+    });
+}
+
+function showAlbum(category) {
+    const album = albums[category];
+    if (!album || album.photos.length === 0) return;
+
+    currentAlbum = category;
+    currentIndex = 0;
+
+    albumViewer.classList.add("active");
+    updateAlbum();
+
+    albumViewer.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    document.querySelectorAll(".gallery-filter").forEach(function (button) {
+        button.classList.toggle("active", button.dataset.category === category);
+    });
+}
+
+function closeAlbumViewer() {
+    albumViewer.classList.remove("active");
+    currentAlbum = null;
+
+    document.querySelectorAll(".gallery-filter").forEach(function (btn) {
+        btn.classList.toggle("active", btn.dataset.category === "all");
+    });
+
+    galleryGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function updateAlbum() {
+    const album = albums[currentAlbum];
+    const photo = album.photos[currentIndex];
+
+    albumTitle.textContent = album.label;
+    albumCounter.textContent = (currentIndex + 1) + " / " + album.photos.length;
+
+    albumPhoto.src = photo.src;
+    albumPhoto.alt = photo.title;
+
+    albumCategory.textContent = album.label;
+    albumPhotoTitle.textContent = photo.title;
+    albumPhotoDescription.textContent = photo.description || "";
+}
+
+function nextPhoto() {
+    if (!currentAlbum) return;
+    const photos = albums[currentAlbum].photos;
+    currentIndex = (currentIndex + 1) % photos.length;
+    updateAlbum();
+}
+
+function previousPhoto() {
+    if (!currentAlbum) return;
+    const photos = albums[currentAlbum].photos;
+    currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+    updateAlbum();
+}
+
+document.getElementById("nextPhoto").addEventListener("click", nextPhoto);
+document.getElementById("prevPhoto").addEventListener("click", previousPhoto);
+document.getElementById("closeAlbum").addEventListener("click", closeAlbumViewer);
+
+document.addEventListener("keydown", function (event) {
+    if (!currentAlbum) return;
+    if (event.key === "ArrowRight") nextPhoto();
+    if (event.key === "ArrowLeft") previousPhoto();
+    if (event.key === "Escape") closeAlbumViewer();
+});
+
+document.querySelectorAll(".gallery-filter").forEach(function (button) {
+    button.addEventListener("click", function () {
+        const category = this.dataset.category;
+
+        if (category === "all") {
+            closeAlbumViewer();
+            return;
+        }
+
+        showAlbum(category);
+    });
+});
+
+// Navigation tactile sur téléphone : glisser gauche/droite.
+let touchStartX = 0;
+
+albumPhoto.addEventListener("touchstart", function (event) {
+    touchStartX = event.changedTouches[0].screenX;
+}, { passive: true });
+
+albumPhoto.addEventListener("touchend", function (event) {
+    const touchEndX = event.changedTouches[0].screenX;
+    const difference = touchEndX - touchStartX;
+
+    if (Math.abs(difference) < 50) return;
+    if (difference < 0) nextPhoto(); else previousPhoto();
+}, { passive: true });
+
+buildGallery();
+</script>
+
 <script src="js/main.js"></script>
 </body>
 </html>
